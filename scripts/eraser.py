@@ -7,10 +7,10 @@ async def eraser():
     login = input()
     print ("Enter password:")
     password = input()
-    print ("Enter secret:")
-    secret = input()
+    print ("Enter app id:")
+    app_id = input()
     
-    session = ImplicitSession(login, password, secret, ['photos', 'wall'])
+    session = ImplicitSession(login, password, app_id, ['photos', 'wall'])
     await session.authorize()
 
     api = API(session)
