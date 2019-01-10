@@ -1,37 +1,44 @@
 import asyncio
-from aiovk import API, ImplicitSession
+from vk_api import VkApi, VkUserPermissions
 from time import sleep
 
-async def eraser():
+def eraser():
     print ("Enter login:")
-    login = input()
+    _login = input()
     print ("Enter password:")
-    password = input()
+    _password = input()
     print ("Enter app id:")
-    app_id = input()
+    _app_id = input()
     
-    session = ImplicitSession(login, password, app_id, ['photos', 'wall'])
-    await session.authorize()
+    _session = VkApi(
+        login=_login,
+        password=_password,
+        app_id=_app_id,
+        auth_handler=auth_handler,
+        scope=(VkUserPermissions.PHOTOS & VkUserPermissions.WALL))
 
-    api = API(session)
+    _session.auth()
+
+    _api = _session.get_api()
 
     while True:
-        wall = await api.wall.get(count = 100)
-        if wall['count'] == 0:
+        _wall = _api.wall.get(count = 100)
+        if _wall['count'] == 0:
             break
-        for i in wall['items']:
-            await api.wall.delete(post_id=i['id'])
+        for i in _wall['items']:
+            _api.wall.delete(post_id=i['id'])
             sleep(2)
 
     while True:
-        photos = await api.photos.get(album_id='wall', count=1000)
-        if photos['count'] == 0:
+        _photos = _api.photos.get(album_id='wall', count=1000)
+        if _photos['count'] == 0:
             break
-        for i in photos['items']:
-            await api.photos.delete(photo_id=i['id'])
+        for i in _photos['items']:
+            _api.photos.delete(photo_id=i['id'])
             sleep(2)
 
-    session.close()
+def auth_handler():
+    print ("Enter two auth code:")
+    return input(), False
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(eraser())
+eraser()
